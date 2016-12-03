@@ -1,1 +1,1 @@
-# ipspider
+# An agent server spider
