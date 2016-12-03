@@ -12,16 +12,12 @@ class testIp
 		foreach ($agentList as $agent) {
 
 			$data  = array(
-				'data' => array(
-					array(
-						'url' => $this->api,
-						'opts'=> array(
-							'proxy' => array(
-								'ip'   => $agent['ip'],
-								'port' => $agent['port']
-								),
-							)
-						)
+				'url' => $this->api,
+				'opts'=> array(
+					'proxy' => array(
+						'ip'   => $agent['ip'],
+						'port' => $agent['port']
+						),
 					)
 				);
 			$ipRes = curl::getIns()->get($data)->body();

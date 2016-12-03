@@ -23,24 +23,17 @@ class spider{
 
 		$curl_params = array();
 
-		$curl_params['data'] = array();
-
 		foreach ($this->urlArr as $key => $url) {
 			//组装url
-			$curl_params['data'][$key]['url'] = $url;
+			$curl_params[$key]['url'] = $url;
 			//组装params
 			if (isset($this->params[$key])) {
-				$curl_params['data'][$key]['params'] = $this->params[$key];
+				$curl_params[$key]['params'] = $this->params[$key];
 			}
 			//组装opts
 			if (isset($this->opts[$key])) {
-				$curl_params['data'][$key]['opts'] = $this->opts[$key];
+				$curl_params[$key]['opts'] = $this->opts[$key];
 			}
-		}
-
-		//开启并行抓取
-		if (count($curl_params['data']) > 1) {
-			$curl_params['multi'] = true;
 		}
 
 		$result = $this->curl->get($curl_params)->body();

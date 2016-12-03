@@ -25,34 +25,22 @@ class curl{
 	/**
 	*$method string post|get
 	*
-	*$data Array
-	*	        (
-	*	            [data] => Array
-	*	                (
-	*	                    [0] => Array
-	*	                        (
-	*	                            [url] => http://www.baidu.com //string 要抓取的连接地址
-	*	                            [params] => Array             //array 如果为Post,则为参数，get时留空
-	*	                                (
-	*	                                )
+	*$data array 
+	*     Array
+	*	     (
+	*	         [url] => 			 //string 要抓取的连接地址
+	*	         [params] => Array   //array 如果为Post,则为参数，get时留空
+	*	             (
+	*	             )
 	*
-	*	                            [opts] => Array 			  //array 额外要添加的curlopt_set参数
-	*	                                (
-	*	                                )
+	*	         [opts] => Array 	 //array 额外要添加的curlopt_set参数
+	*	             (
+	*	             )
 	*
-	*	                        )
-	*
-	*	                )
-	*
-	*	            [multi] => 1 // bool 开启multicurl
-	*	        )
-	*
-	*	)
+	*	     )
 	**/
 	public function __call($method,$data)
 	{
-
-		$data = $data['0'];
 
 		$method_arr = array(
 			'get',
@@ -62,24 +50,50 @@ class curl{
 		if (!in_array($method, $method_arr)) {
 			throw new Exception("Error Method Request", 1);
 		}
-		//使用cURL批处理方式
-		if (!empty($data['multi']) && count($data['data'] > 1)) {
 
-			$chArr = array();
-			foreach ($data['data'] as $curlData) {
-				if (!$curlData['url']) continue;
-				$chArr[] = $this->get_handle($method,$curlData);
-			}
-
-			$result = $this->multiCurl($chArr);
-		} else {
-
-			$ch = $this->get_handle($method,$data['data']['0']);
-			$result = $this->singleCurl($ch);
-		}
+		$ch = $this->get_handle($method,$data);
+		$result = curl_exec($ch);
+		curl_close($ch);
 
 		$this->result = $result;
+		return self::$_ins;
+	}
 
+	/**
+	*多句柄处理,默认GET方法，当params不为空时自动转为POST
+	*$data array()
+	**/
+	public function multiCurl($data = array())
+	{
+		if (empty($data)) return false;
+
+		$mh = curl_multi_init();
+
+		//加入句柄
+		foreach ($data as $singleData) {
+			$ch = $this->get_handle('get',$singleData);
+			curl_multi_add_handle($mh,$ch);
+		}
+
+		$running = null;
+		//执行批处理句柄
+		do {
+			usleep(5000);
+			curl_multi_exec($mh, $running);
+		} while ($running > 0);
+
+		$result = array();
+		//读取结果
+		foreach ($chArr as $ch) {
+			$result[] = curl_multi_getcontent($ch);
+			//销毁句柄
+			curl_multi_remove_handle($mh, $ch);
+		}
+
+		//关闭句柄
+		curl_multi_close($mh);
+
+		$this->result = $result;
 		return self::$_ins;
 	}
 
@@ -119,7 +133,7 @@ class curl{
 		}
 
 		//构造post请求参数
-		if ($method == 'post') {
+		if ($method == 'post' || !empty($data['params'])) {
 
 			curl_setopt($ch, CURLOPT_POST, 1);
 
@@ -172,56 +186,6 @@ class curl{
 		}
 
 		return $ch;
-	}
-
-	/**
-	*单句柄处理
-	*$ch source 句柄资源
-	**/
-	private function singleCurl($ch)
-	{
-		if (!$ch) return false;
-
-		$result = curl_exec($ch);
-		curl_close($ch);
-
-		return $result;
-	}
-
-	/**
-	*多句柄处理
-	*$chArr array() 句柄集合
-	**/
-	private function multiCurl($chArr = array())
-	{
-		if (empty($chArr)) return false;
-
-		$mh = curl_multi_init();
-
-		//加入句柄
-		foreach ($chArr as $ch) {
-			curl_multi_add_handle($mh,$ch);
-		}
-
-		$running = null;
-		//执行批处理句柄
-		do {
-			usleep(5000);
-			curl_multi_exec($mh, $running);
-		} while ($running > 0);
-
-		$result = array();
-		//读取结果
-		foreach ($chArr as $ch) {
-			$result[] = curl_multi_getcontent($ch);
-			//销毁句柄
-			curl_multi_remove_handle($mh, $ch);
-		}
-
-		//关闭句柄
-		curl_multi_close($mh);
-
-		return $result;
 	}
 
 	public function body()

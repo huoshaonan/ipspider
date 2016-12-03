@@ -133,11 +133,7 @@ class youdailiSpider
 
 			$url = $baseurl.'/list_'.$i.'.html';
 			$data = array(
-				'data' => array(
-						array(
-							'url' => $url
-							)
-					)
+				'url' => $url
 				);
 			$content = $this->curl->get($data)->body();
 			$urlInfo = $this->getUrlInfo($content);
@@ -167,11 +163,7 @@ class youdailiSpider
 				foreach ($matches['1'] as $url) {
 					$tmpResult['url'] = $url;
 					$data = array(
-						'data' => array(
-								array(
-									'url' => $url
-									)
-							)
+						'url' => $url
 						);
 					$urlRes = $this->curl->get($data)->body();
 					//匹配页数
