@@ -43,8 +43,6 @@ class youdailiSpider
 					$spider->setOpts(array('headers' => $headers));
 					$result = $spider->run();
 
-					$result = arrayToString($result);
-
 					$result = $this->preg_parse($result);
 
 					$succNum += ipmodel::getIns()->table('agent_ip')->add($result);

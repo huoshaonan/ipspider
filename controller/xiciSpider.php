@@ -13,42 +13,41 @@ class xiciSpider
 	*抓取
 	**/
 	public function index($baseurl = null) {
-		$spider = new spider();
 		if (!$baseurl) {
 			$baseurl = 'http://bjweb.xicidaili.com/nn/';
 		}
 
-		$succNum = 0;//成功入库数
-		$urlArr = array();
-		for ($i=0;$i<5;$i++) {
+		$thread_array = array();
+		for ($i=0;$i<500;$i++) {
 
-			$urlArr[] = $baseurl.'/'.($i+1);
+            $url = $baseurl.'/'.($i+1);
+            $headers = array(
+                'Upgrade-Insecure-Requests: 1',
+                'Referer: http://bjweb.xicidaili.com/nt/',
+                'Cookie: _free_proxy_session=BAh7B0kiD3Nlc3Npb25faWQGOgZFVEkiJTBlZjcyYTMyMWJhOWZjNmU5YWI3MGViODM2OWM5YzdjBjsAVEkiEF9jc3JmX3Rva2VuBjsARkkiMTJuOVZ1TUx3L1dIaGpxdlRYMENCUUNHZHFhOFlZZUJOZ25zK3dRMFZqdkU9BjsARg%3D%3D--e732a2e5d0053503e55de69a28148616017e4674; CNZZDATA1256960793=895916990-1479433787-null%7C1479433787',
+                'If-None-Match: W/"61b2999f1436c69593b23a7b1a803c1e"'
+                );
+            $thread_array[$i] = new myPthreads($url,array('headers' => $headers));
+            $thread_array[$i]->start();
+        }
 
-			//每次并行抓取五页
-			if (count($urlArr) >= 5) {
-				$spider->setUrlArr($urlArr);
-				$headers = array(
-					'Upgrade-Insecure-Requests: 1',
-					'Referer: http://bjweb.xicidaili.com/nt/',
-					'Cookie: _free_proxy_session=BAh7B0kiD3Nlc3Npb25faWQGOgZFVEkiJTBlZjcyYTMyMWJhOWZjNmU5YWI3MGViODM2OWM5YzdjBjsAVEkiEF9jc3JmX3Rva2VuBjsARkkiMTJuOVZ1TUx3L1dIaGpxdlRYMENCUUNHZHFhOFlZZUJOZ25zK3dRMFZqdkU9BjsARg%3D%3D--e732a2e5d0053503e55de69a28148616017e4674; CNZZDATA1256960793=895916990-1479433787-null%7C1479433787',
-					'If-None-Match: W/"61b2999f1436c69593b23a7b1a803c1e"'
-					);
-				$spider->setOpts(array('headers' => $headers));
-				$result = $spider->run();
+        foreach ($thread_array as $key => $thread) {
 
-				$result = arrayToString($result);
+            while ($thread_array[$key]->isRunning()) {
+                usleep(10);
+            }
 
-				$result = $this->preg_parse($result);
+            if ($thread_array[$key]->join()) {
 
-				$succNum += ipmodel::getIns()->table('agent_ip')->add($result);
-				unset($result);
-				$urlArr = array();
-				sleep(2);
-			}
-		}
+                $result = $thread_array[$key]->data;
+                $result = $this->preg_parse($result);
+                $succNum = ipmodel::getIns()->table('agent_ip')->add($result);
+                unset($result);
+                echo date('H:i:s',time()).'  抓取完成:'.$succNum.PHP_EOL;
+            }
+        }
 
-		echo date('H:i:s',time()).'  抓取完成:'.$succNum.PHP_EOL;
-	}
+    }
 
 	/**
 	*解析字段

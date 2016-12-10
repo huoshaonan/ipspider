@@ -36,18 +36,47 @@ class spider{
 			}
 		}
 
-		$result = $this->curl->get($curl_params)->body();
+		$itemCounts = count($curl_params);
+
+		if ($itemCounts > 1) {//并发请求
+
+			$result = $this->curl->multiCurl($curl_params)->body();
+			$result = arrayToString($result);
+		} elseif ($itemCounts == 1) {//单个请求
+
+			$curl_params = $curl_params['0'];
+			//根据params是否为空判断get/post请求
+			if (empty($curl_params['params'])) {
+
+				$result = $this->curl->get($curl_params)->body();
+			} else {
+
+				$result = $this->curl->post($curl_params)->body();
+			}
+		} else {
+
+			$result = '';
+		}
+
 
 		return $result;
 	}
-	
+
 	/**
 	*设置url集合
+     *$urlArr string|array
 	**/
 	public function setUrlArr($urlArr = array())
 	{
 		if (!empty($urlArr)) {
-			$this->urlArr = $urlArr;
+
+		    if (is_array($urlArr)) {
+
+		        $this->urlArr = $urlArr;
+            } else {
+
+                $this->urlArr = array($urlArr);
+            }
 		}
 	}
 

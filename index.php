@@ -8,7 +8,7 @@ require_once CONTROLLER_PATH.'/spider.php';
 require_once BASE_PATH.'/model/ipmodel.php';
 require_once BASE_PATH.'/library/function.php';
 require_once BASE_PATH.'/library/curl.php';
-require_once BASE_PATH.'/controller/xiciSpider.php';
+require_once BASE_PATH.'/controller/myPthreads.php';
 
 set_time_limit(0);
 
