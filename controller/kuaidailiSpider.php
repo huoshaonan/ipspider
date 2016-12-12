@@ -33,34 +33,35 @@ class kuaidailiSpider
 			$baseurl = $arr['url'];
 			$total_num = $arr['num'];
 
-			$succNum = 0;//成功入库数
-			$urlArr = array();
+            $thread_array = array();
 			for ($i=0;$i<$total_num;$i++) {
-
-				$urlArr[] = $baseurl.'/'.($i+1);
-
-				//每次并行抓取五页
-				if (count($urlArr) >= 5) {
-					$spider->setUrlArr($urlArr);
-					$headers = array(
-						'Upgrade-Insecure-Requests: 1',
-						'Referer: http://www.kuaidaili.com/free/inha/1/',
-						'Cookie: _gat=1; channelid=0; sid=1479540480086332; _ga=GA1.2.1601349455.1479541706; Hm_lvt_7ed65b1cc4b810e9fd37959c9bb51b31=1479541706; Hm_lpvt_7ed65b1cc4b810e9fd37959c9bb51b31=1479542324',
-						);
-					$spider->setOpts(array('headers' => $headers));
-					$result = $spider->run();
-
-					$result = $this->preg_parse($result);
-
-					$succNum += ipmodel::getIns()->table('agent_ip')->add($result);
-					unset($result);
-					$urlArr = array();
-					sleep(2);
-				}
+				
+				$headers = array(
+					'Upgrade-Insecure-Requests: 1',
+					'Referer: http://www.kuaidaili.com/free/inha/1/',
+					'Cookie: _gat=1; channelid=0; sid=1479540480086332; _ga=GA1.2.1601349455.1479541706; Hm_lvt_7ed65b1cc4b810e9fd37959c9bb51b31=1479541706; Hm_lpvt_7ed65b1cc4b810e9fd37959c9bb51b31=1479542324',
+					);
+                $thread_array[$i] = new myPthreads($baseurl.'/'.($i+1),array('headers' => $headers));
+                $thread_array[$i]->start();
+				usleep(1);
 			}
 
-			echo date('H:i:s',time()).'  抓取完成:'.$succNum.PHP_EOL;
-		}
+			foreach ($thread_array as $key => $thread) {
+
+			    while ($thread_array[$key]->isRunning()) {
+			        usleep(10);
+                }
+
+                if ($thread_array[$key]->join()) {
+                    $result = $thread_array[$key]->data;
+                    $result = $this->preg_parse($result);
+                    $succNum = ipmodel::getIns()->table('agent_ip')->add($result);
+                    unset($result);
+                    echo date('H:i:s',time()).'  抓取完成:'.$succNum.PHP_EOL;
+                }
+            }
+
+        }
 	}
 
 	/**
