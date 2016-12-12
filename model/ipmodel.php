@@ -21,7 +21,7 @@ class ipmodel
 	{
 		try{
 			$this->pdo = new PDO('mysql:host=192.168.71.130;dbname=test','slaveuser1','root');
-		}catch(Exception $e) {
+		} catch (Exception $e) {
 			exit('mysql connect error');
 		}
 		$this->pdo->exec('set names utf8');
