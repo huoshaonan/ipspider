@@ -23,13 +23,11 @@ class xiciSpider
             $url = $baseurl.'/'.($i+1);
             $headers = array(
                 'Upgrade-Insecure-Requests: 1',
-                'Referer: http://bjweb.xicidaili.com/nt/',
-                'Cookie: _free_proxy_session=BAh7B0kiD3Nlc3Npb25faWQGOgZFVEkiJTBlZjcyYTMyMWJhOWZjNmU5YWI3MGViODM2OWM5YzdjBjsAVEkiEF9jc3JmX3Rva2VuBjsARkkiMTJuOVZ1TUx3L1dIaGpxdlRYMENCUUNHZHFhOFlZZUJOZ25zK3dRMFZqdkU9BjsARg%3D%3D--e732a2e5d0053503e55de69a28148616017e4674; CNZZDATA1256960793=895916990-1479433787-null%7C1479433787',
-                'If-None-Match: W/"61b2999f1436c69593b23a7b1a803c1e"'
+                'Referer: http://bjweb.xicidaili.com/nt/'
                 );
             $thread_array[$i] = new myPthreads($url,array('headers' => $headers));
             $thread_array[$i]->start();
-            usleep(500);
+            sleep(1);
         }
 
         foreach ($thread_array as $key => $thread) {
