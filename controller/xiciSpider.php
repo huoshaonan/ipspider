@@ -1,8 +1,8 @@
 <?php
 /**
 *抓取西刺代理类
-*http://bjweb.xicidaili.com/nn/
-*http://bjweb.xicidaili.com/nt/
+*http://bjweb.xicidaili.com/nn
+*http://bjweb.xicidaili.com/nt
 **/
 class xiciSpider
 {
@@ -14,7 +14,7 @@ class xiciSpider
 	**/
 	public function index($baseurl = null) {
 		if (!$baseurl) {
-			$baseurl = 'http://bjweb.xicidaili.com/nn/';
+			$baseurl = 'http://bjweb.xicidaili.com/nn';
 		}
 
 		$thread_array = array();

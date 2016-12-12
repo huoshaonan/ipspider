@@ -19,7 +19,11 @@ class ipmodel
 
 	private final function __construct()
 	{
-		$this->pdo = new PDO('mysql:host=192.168.71.130;dbname=test','slaveuser1','root');
+		try{
+			$this->pdo = new PDO('mysql:host=192.168.71.130;dbname=test','slaveuser1','root');
+		}catch(Exception $e) {
+			exit('mysql connect error');
+		}
 		$this->pdo->exec('set names utf8');
 	}
 

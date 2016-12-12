@@ -51,7 +51,7 @@ class curl{
 			throw new Exception("Error Method Request", 1);
 		}
 
-		$ch = $this->get_handle($method,$data);
+		$ch = $this->get_handle($method,$data['0']);
 		$result = curl_exec($ch);
 		curl_close($ch);
 

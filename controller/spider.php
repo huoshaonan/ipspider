@@ -66,7 +66,7 @@ class spider{
 	*设置url集合
      *$urlArr string|array
 	**/
-	public function setUrlArr($urlArr = array())
+	public function setUrlArr($urlArr)
 	{
 		if (!empty($urlArr)) {
 
