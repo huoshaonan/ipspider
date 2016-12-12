@@ -29,7 +29,7 @@ class xiciSpider
                 );
             $thread_array[$i] = new myPthreads($url,array('headers' => $headers));
             $thread_array[$i]->start();
-            usleep(1000);
+            usleep(2000);
         }
 
         foreach ($thread_array as $key => $thread) {
